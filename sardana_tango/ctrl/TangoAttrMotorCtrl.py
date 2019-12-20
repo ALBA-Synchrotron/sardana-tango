@@ -1,4 +1,3 @@
-import math
 import time
 
 from tango import AttrQuality, AttributeProxy, DevFailed
@@ -8,6 +7,8 @@ from sardana.pool.controller import Type, Access, Description
 
 
 TANGO_ATTR = 'TangoAttribute'
+TANGO_LIMIT_PLUS = 'TangoLimitPlus'
+TANGO_LIMIT_MINUS = 'TangoLimitMinus'
 FORMULA_READ = 'FormulaRead'
 FORMULA_WRITE = 'FormulaWrite'
 TANGO_ATTR_ENC = 'TangoAttributeEncoder'
@@ -16,6 +17,8 @@ TANGO_ATTR_ENC_SPEED = 'TangoAttributeEncoderSpeed'
 
 TAU_ATTR = 'TauAttribute'
 TAU_ATTR_ENC = 'TauAttributeEnc'
+TAU_LIMIT_PLUS = 'TauLimitPlus'
+TAU_LIMIT_MINUS = 'TauLimitMinus'
 MOVE_TO = 'MoveTo'
 MOVE_TIMEOUT = 'MoveTimeout'
 
@@ -39,6 +42,8 @@ class TangoAttrMotorController(MotorController):
         ch2.FormulaWrite = 'math.pow(VALUE,2)'
 
     Each motor could use the following optional extra attributes:
+    +) TangoLimitPlus/Minus - Used to set the boolean attributes for limit
+        switches.
     +) TangoAttributeEncoder - Used in case you want to use another attribute
         (different than the TangoAttribute) when the motor's position is to be
         read.
@@ -61,6 +66,18 @@ class TangoAttrMotorController(MotorController):
             Type: str,
             Description: 'The first Tango Attribute to read'\
                 ' (e.g. my/tango/dev/attr)',
+            Access: DataAccess.ReadWrite
+        },
+        TANGO_LIMIT_PLUS: {
+            Type: str,
+            Description: 'The Tango Attribute indicating positive limit'\
+                ' (e.g. my/tango/dev/limit_plus)',
+            Access: DataAccess.ReadWrite
+        },
+        TANGO_LIMIT_MINUS: {
+            Type: str,
+            Description: 'The Tango Attribute indicating negative limit'\
+                ' (e.g. my/tango/dev/limit_minus)',
             Access: DataAccess.ReadWrite
         },
         FORMULA_READ: {
@@ -101,6 +118,8 @@ class TangoAttrMotorController(MotorController):
     def AddDevice(self, axis):
         self.axisAttributes[axis] = {}
         self.axisAttributes[axis][TAU_ATTR] = None
+        self.axisAttributes[axis][TAU_LIMIT_PLUS] = None
+        self.axisAttributes[axis][TAU_LIMIT_MINUS] = None
         self.axisAttributes[axis][FORMULA_READ] = 'VALUE'
         self.axisAttributes[axis][FORMULA_WRITE] = 'VALUE'
         self.axisAttributes[axis][TAU_ATTR_ENC] = None
@@ -118,6 +137,8 @@ class TangoAttrMotorController(MotorController):
             status = 'ok'
             switch_state = 0
             tau_attr = self.axisAttributes[axis][TAU_ATTR]
+            tau_limit_plus = self.axisAttributes[axis][TAU_LIMIT_PLUS]
+            tau_limit_minus = self.axisAttributes[axis][TAU_LIMIT_MINUS]
             if tau_attr is None:
                 return (State.Alarm, "attribute proxy is None", 0)
 
@@ -147,8 +168,22 @@ class TangoAttrMotorController(MotorController):
                                                move_to - enc_threshold,
                                                move_to + enc_threshold))
 
-            # SHOULD DEAL ALSO ABOUT LIMITS
-            switch_state = 0
+            limit_plus = 0
+            limit_minus = 0
+            switch_state = MotorController.NoLimitSwitch
+            if tau_limit_plus:
+                limit_plus = tau_limit_plus.read().value
+            if tau_limit_minus:
+                limit_minus = tau_limit_minus.read().value
+                
+            if limit_plus:
+                switch_state |= MotorController.UpperLimitSwitch
+                state = State.Alarm
+            elif limit_minus:
+                switch_state |= MotorController.LowerLimitSwitch
+                
+            if (state != State.Moving) & (limit_plus | limit_minus):
+                state = State.Alarm
             return (state, status, switch_state)
         except Exception as e:
             self._log.error(" (%d) error getting state: %s" % (axis, str(e)))
@@ -239,10 +274,15 @@ class TangoAttrMotorController(MotorController):
             self._log.debug(
                 "SetExtraAttributePar [%d] %s = %s" % (axis, name, value))
             self.axisAttributes[axis][name] = value
-            if name in [TANGO_ATTR, TANGO_ATTR_ENC]:
+            if name in [TANGO_ATTR, TANGO_ATTR_ENC, TANGO_LIMIT_PLUS,
+                        TANGO_LIMIT_MINUS]:
                 key = TAU_ATTR
                 if name == TANGO_ATTR_ENC:
                     key = TAU_ATTR_ENC
+                elif name == TANGO_LIMIT_PLUS:
+                    key = TAU_LIMIT_PLUS
+                elif name == TANGO_LIMIT_MINUS:
+                    key = TAU_LIMIT_MINUS
                 try:
                     self.axisAttributes[axis][key] = AttributeProxy(value)
                 except Exception as e:

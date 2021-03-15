@@ -1,3 +1,0 @@
-recursive-include python *.py
-
-global-exclude *.pyc .gitignore

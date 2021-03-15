@@ -1,16 +1,13 @@
 #!/usr/bin/env python
 
 from setuptools import setup, find_packages
-from datetime import datetime
 
 with open("README.md") as f:
     readme = f.read()
 
-release = datetime.today().strftime('%Y.%m.%d.%H.%M').replace(".0", ".")
-
 setup(
-    name='sardana_tango',
-    version=release,
+    name="sardana_tango",
+    version="0.0.1",
     author="Sardana Controller Developers",
     author_email="sardana-devel@lists.sourceforge.net",
     maintainer="ALBA",

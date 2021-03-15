@@ -7,7 +7,7 @@ with open("README.md") as f:
 
 setup(
     name="sardana_tango",
-    version="0.0.1",
+    version="0.0.2",
     author="Sardana Controller Developers",
     author_email="sardana-devel@lists.sourceforge.net",
     maintainer="ALBA",

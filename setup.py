@@ -33,5 +33,6 @@ setup(
     long_description_content_type="text/markdown",
     include_package_data=True,
     keywords="tango,sardana",
-    python_requires=">=3.5"
+    python_requires=">=3.5",
+    install_requires=["sardana", "pytango"]
 )

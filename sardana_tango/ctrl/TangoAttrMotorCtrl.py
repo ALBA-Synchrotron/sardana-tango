@@ -148,10 +148,8 @@ class TangoAttrMotorController(MotorController):
             if tau_attr.read().quality == AttrQuality.ATTR_CHANGING:
                 state = State.Moving
 
-            elif self.axisAttributes[axis][MOVE_TIMEOUT] is not None:
+            elif (self.axisAttributes[axis][MOVE_TIMEOUT] != None) and (enc_threshold > 0):
                 # tau_attr_enc = self.axisAttributes[axis][TAU_ATTR_ENC]
-                enc_threshold = self.axisAttributes[
-                    axis][TANGO_ATTR_ENC_THRESHOLD]
                 move_to = self.axisAttributes[axis][MOVE_TO]
                 move_timeout = self.axisAttributes[axis][MOVE_TIMEOUT]
 
@@ -171,6 +169,8 @@ class TangoAttrMotorController(MotorController):
                         ' in [%f,%f]' % (current_pos,
                                          move_to - enc_threshold,
                                          move_to + enc_threshold))
+            else:
+                state = tau_attr.state()
 
             limit_plus = 0
             limit_minus = 0

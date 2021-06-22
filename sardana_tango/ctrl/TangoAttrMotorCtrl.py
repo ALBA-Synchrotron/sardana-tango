@@ -1,3 +1,5 @@
+
+import math   # noqa: F401
 import time
 
 from tango import AttrQuality, AttributeProxy, DevFailed
@@ -64,8 +66,8 @@ class TangoAttrMotorController(MotorController):
     axis_attributes = {
         TANGO_ATTR: {
             Type: str,
-            Description: 'The first Tango Attribute to read'\
-                ' (e.g. my/tango/dev/attr)',
+            Description: 'The first Tango Attribute to read'
+            ' (e.g. my/tango/dev/attr)',
             Access: DataAccess.ReadWrite
         },
         TANGO_LIMIT_PLUS: {
@@ -82,14 +84,14 @@ class TangoAttrMotorController(MotorController):
         },
         FORMULA_READ: {
             Type: str,
-            Description: 'The Formula to get the desired position from'\
-                ' attribute value.\ne.g. "math.sqrt(VALUE)"',
+            Description: 'The Formula to get the desired position from'
+            ' attribute value.\ne.g. "math.sqrt(VALUE)"',
             Access: DataAccess.ReadWrite
         },
         FORMULA_WRITE: {
             Type: str,
-            Description: 'The Formula to set the desired value from motor'\
-                ' position.\ne.g. "math.pow(VALUE,2)"',
+            Description: 'The Formula to set the desired value from motor'
+            ' position.\ne.g. "math.pow(VALUE,2)"',
             Access: DataAccess.ReadWrite
         },
         TANGO_ATTR_ENC: {
@@ -99,14 +101,14 @@ class TangoAttrMotorController(MotorController):
         },
         TANGO_ATTR_ENC_THRESHOLD: {
             Type: float,
-            Description: 'Maximum difference for considering the motor'\
-                ' stopped"',
+            Description: 'Maximum difference for considering the motor'
+            ' stopped"',
             Access: DataAccess.ReadWrite
         },
         TANGO_ATTR_ENC_SPEED: {
             Type: float,
-            Description: 'Units per second used to wait encoder value within'\
-                ' threshold after a movement."',
+            Description: 'Units per second used to wait encoder value within'
+            ' threshold after a movement."',
             Access: DataAccess.ReadWrite
         }
     }
@@ -145,8 +147,8 @@ class TangoAttrMotorController(MotorController):
             if tau_attr.read().quality == AttrQuality.ATTR_CHANGING:
                 state = State.Moving
 
-            elif self.axisAttributes[axis][MOVE_TIMEOUT] != None:
-                tau_attr_enc = self.axisAttributes[axis][TAU_ATTR_ENC]
+            elif self.axisAttributes[axis][MOVE_TIMEOUT] is not None:
+                # tau_attr_enc = self.axisAttributes[axis][TAU_ATTR_ENC]
                 enc_threshold = self.axisAttributes[
                     axis][TANGO_ATTR_ENC_THRESHOLD]
                 move_to = self.axisAttributes[axis][MOVE_TO]
@@ -163,10 +165,11 @@ class TangoAttrMotorController(MotorController):
                     state = State.Moving
                 else:
                     state = State.Alarm
-                    status = ('Motor did not reach the desired position. %f not'
-                              ' in [%f,%f]' % (current_pos,
-                                               move_to - enc_threshold,
-                                               move_to + enc_threshold))
+                    status = (
+                        'Motor did not reach the desired position. %f not'
+                        ' in [%f,%f]' % (current_pos,
+                                         move_to - enc_threshold,
+                                         move_to + enc_threshold))
 
             limit_plus = 0
             limit_minus = 0
@@ -211,7 +214,7 @@ class TangoAttrMotorController(MotorController):
             VALUE = tau_attr.read().value
             # just in case 'VALUE' has been written in lowercase in the
             # formula...
-            value = VALUE
+            value = VALUE   # noqa: F841
             evaluated_value = eval(formula)
             return evaluated_value
         except Exception as e:
@@ -231,7 +234,7 @@ class TangoAttrMotorController(MotorController):
             VALUE = pos
             # just in case 'VALUE' has been written in lowercase in the
             # formula...
-            value = VALUE
+            value = VALUE   # noqa: F841
             evaluated_value = eval(formula)
 
             try:
@@ -260,10 +263,10 @@ class TangoAttrMotorController(MotorController):
     def StopOne(self, axis):
         pass
 
-    def SetPar(self, axis, name, value):
+    def SetAxisPar(self, axis, name, value):
         self.axisAttributes[axis][name] = value
 
-    def GetPar(self, axis, name):
+    def GetAxisPar(self, axis, name):
         return self.axisAttributes[axis][name]
 
     def GetAxisExtraPar(self, axis, name):
@@ -272,7 +275,7 @@ class TangoAttrMotorController(MotorController):
     def SetAxisExtraPar(self, axis, name, value):
         try:
             self._log.debug(
-                "SetExtraAttributePar [%d] %s = %s" % (axis, name, value))
+                "SetAxisExtraPar [%d] %s = %s" % (axis, name, value))
             self.axisAttributes[axis][name] = value
             if name in [TANGO_ATTR, TANGO_ATTR_ENC, TANGO_LIMIT_PLUS,
                         TANGO_LIMIT_MINUS]:
@@ -293,10 +296,10 @@ class TangoAttrMotorController(MotorController):
             self._log.error("SetExtraAttribute DevFailed: (%s) %s" %
                             (de.reason, de.desc))
             self._log.error("SetExtraAttribute DevFailed: %s" % str(df))
-            #raise df
+            # raise df
         except Exception as e:
             self._log.error("SetExtraAttribute Exception: %s" % str(e))
-            #raise e
+            # raise e
 
     def SendToCtrl(self, in_data):
         return ""

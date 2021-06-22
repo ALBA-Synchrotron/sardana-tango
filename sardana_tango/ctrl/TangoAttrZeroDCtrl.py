@@ -1,4 +1,4 @@
-import math
+import math  # noqa: F401
 import tango
 
 from sardana import State, DataAccess
@@ -23,14 +23,14 @@ class ReadTangoAttributes():
     axis_attributes = {
         TANGO_ATTR: {
             Type: str,
-            Description: 'The first Tango Attribute to read'\
-                ' (e.g. my/tango/dev/attr)',
+            Description: 'The first Tango Attribute to read'
+            ' (e.g. my/tango/dev/attr)',
             Access: DataAccess.ReadWrite
         },
-        FORMULA:{
+        FORMULA: {
             Type: str,
-            Description: 'The Formula to get the desired value.\n'\
-                ' e.g. "math.sqrt(VALUE)"',
+            Description: 'The Formula to get the desired value.\n'
+            ' e.g. "math.sqrt(VALUE)"',
             Access: DataAccess.ReadWrite
         }
     }
@@ -67,6 +67,7 @@ class ReadTangoAttributes():
         index = self.devices_to_read[dev].index(attr)
         self.devsExtraAttributes[axis][INDEX_READ_ALL] = index
 
+    # TODO create a base clase for the ZeroD and CT controllers
     def read_all(self):
         try:
             for dev in list(self.devices_to_read.keys()):
@@ -85,31 +86,35 @@ class ReadTangoAttributes():
                     for attr in attributes:
                         axis = self.axis_by_tango_attribute[dev + '/' + attr]
                         self.devsExtraAttributes[axis][EVALUATED_VALUE] = e
-                    self._log.debug("Exception on read the attribute:%r"%e)
-                except Exception as e:
-                    self._log.error('Exception reading attributes:%s.%s' %
-                                    (dev, str(attributes)))
-            
+                    self._log.debug("Exception on read the attribute:%r", e)
+                except Exception:
+                    self._log.error('Exception reading attributes:%s.%s',
+                                    dev, str(attributes))
+
             for attr in attributes:
-                  axies = []
-                  for axis, dic in self.devsExtraAttributes.items():
-                      if dic[TANGO_ATTR] == dev+'/'+attr:
-                           axies.append(axis)
-                  for axis in axies:
+                axies = []
+                for axis, dic in self.devsExtraAttributes.items():
+                    if dic[TANGO_ATTR] == dev+'/'+attr:
+                        axies.append(axis)
+                for axis in axies:
                     if len(values) > 0:
                         dev_attr_value = values[attr]
                         if dev_attr_value.has_failed:
                             # In case of Attribute error
-                            VALUE = tango.DevFailed(*dev_attr_value.get_err_stack())
-                            self.devsExtraAttributes[axis][EVALUATED_VALUE] = VALUE
+                            VALUE = tango.DevFailed(
+                                *dev_attr_value.get_err_stack())
+                            self.devsExtraAttributes[axis][EVALUATED_VALUE] = \
+                                VALUE
                         else:
                             formula = self.devsExtraAttributes[axis][FORMULA]
                             VALUE = float(dev_attr_value.value)
-                            value = VALUE # just in case 'VALUE' has been written in lowercase...
+                            # just in case 'VALUE' has been
+                            # written in lowercase...
+                            value = VALUE  # noqa: F841
                             v = eval(formula)
                             self.devsExtraAttributes[axis][EVALUATED_VALUE] = v
         except Exception as e:
-          self._log.error('Exception on read_all: %r'%e)
+            self._log.error('Exception on read_all: %r', e)
 
     def read_one(self, axis):
         value = self.devsExtraAttributes[axis][EVALUATED_VALUE]
@@ -121,7 +126,7 @@ class ReadTangoAttributes():
         return self.devsExtraAttributes[axis][name]
 
     def set_axis_extra_par(self, axis, name, value):
-        value =  value.lower()
+        value = value.lower()
         self._log.debug(
             'set_axis_extra_par [%d] %s = %s' % (axis, name, value))
         self.devsExtraAttributes[axis][name] = value
@@ -193,18 +198,18 @@ class TangoAttrZeroDController(ReadTangoAttributes, ZeroDController):
 
     def SendToCtrl(self, in_data):
         return ""
-    
+
     def AbortOne(self, axis):
         pass
-        
+
     def PreStartAll(self):
         pass
 
     def StartOne(self, axis):
         pass
-    
+
     def StartAll(self):
         pass
-    
+
     def LoadOne(self, axis, value, repetitions, latency):
         pass

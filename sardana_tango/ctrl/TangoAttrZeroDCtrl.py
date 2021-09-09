@@ -100,7 +100,7 @@ class ReadTangoAttributes():
                         if len(values) > 0:
                             dev_attr_value = values[attr]
                             if dev_attr_value.has_failed:
-                            # In case of Attribute error
+                                # In case of Attribute error
                                 VALUE = tango.DevFailed(
                                     *dev_attr_value.get_err_stack())
                                 self.devsExtraAttributes[axis][EVALUATED_VALUE] = \

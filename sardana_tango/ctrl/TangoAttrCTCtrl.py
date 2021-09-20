@@ -96,9 +96,6 @@ class ReadTangoAttributes:
                         extra_attribute_axis = self.devsExtraAttributes[axis]
                         if len(values) > 0:
                             dev_attr_value = values[attr]
-                            self._log.debug("For attribute %s axis %d [%s]"
-                                            % (str(attr), axis,
-                                               str(dev_attr_value)))
                             if dev_attr_value.has_failed:
                                 # In case of Attribute error
                                 VALUE = tango.DevFailed(

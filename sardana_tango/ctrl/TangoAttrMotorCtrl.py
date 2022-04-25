@@ -152,7 +152,7 @@ class TangoAttrMotorController(MotorController):
             switch_state = 0
             return (state, status, switch_state)
         except Exception as e:
-            self._log.error(" (%d) error getting state: %s" % (axis, str(e)))
+            self._log.debug(" (%d) error getting state: %s" % (axis, str(e)))
             return (State.Alarm, "Exception: %s" % str(e), 0)
 
     def PreReadAll(self):

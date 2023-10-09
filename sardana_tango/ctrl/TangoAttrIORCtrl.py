@@ -169,9 +169,9 @@ class TangoAttrIORController(IORegisterController):
                     "Not yet configured the Tango Attribute, "
                     "or cannot proxy it")
         if not lcalibration == 0 and not llabels == lcalibration:
-            return(State.Disable,
-                   "Bad configuration of the extra attributes, "
-                   "this cannot be operated")
+            return (State.Disable,
+                    "Bad configuration of the extra attributes, "
+                    "this cannot be operated")
         else:
             dev_state = dev_proxy.state()
             if readFailed and not dev_state == DevState.MOVING:

@@ -137,6 +137,7 @@ class ReadTangoAttributes():
             self.devsExtraAttributes[axis][DEVICE] = dev
             self.devsExtraAttributes[axis][ATTRIBUTE] = attr
             self.axis_by_tango_attribute[value] = axis
+                    
 
 
 class TangoAttrZeroDController(ReadTangoAttributes, ZeroDController):

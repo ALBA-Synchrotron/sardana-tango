@@ -211,7 +211,7 @@ class TangoAttrIORController(IORegisterController):
                 try:
                     positions.index(value)
                 except Exception:
-                    raise Exception("Invalid position.")
+                    raise ValueError("Invalid position.")
                 else:
                     return value
             # case 1+fussy: the read from the attribute must be in one of the
@@ -222,17 +222,22 @@ class TangoAttrIORController(IORegisterController):
                         return positions[calibration.index(fussyPos)]
                 # if the loop ends, current value is not in the fussy areas.
                 self.devsExtraAttributes[axis][READFAILED] = True
-                raise Exception("Invalid position.")
+                msg = 'Position out of calibration bounds. ' \
+                      'Please review ior calibration or write a valid value ' \
+                      'to the underlying tango attribute: %s.%s' % (
+                          self.devsExtraAttributes[axis][DEVICE], attr)
+                raise ValueError(msg)
             else:
                 raise Exception(
                     "Bad configuration on optional extra attributes.")
-        except Exception:
+        except Exception as e:
             self._log.error('Exception reading attribute:%s.%s'
                             % (self.devsExtraAttributes[axis][DEVICE], attr))
             try:
                 self.devsExtraAttributes[axis][READFAILED] = True
             except Exception:
                 pass
+            raise e
 
     def WriteOne(self, axis, value):
         # If Labels is well defined, the write value must be one this struct
@@ -256,7 +261,7 @@ class TangoAttrIORController(IORegisterController):
                 try:
                     positions.index(value)
                 except Exception:
-                    raise Exception("Invalid position.")
+                    raise ValueError("Invalid position.")
                 dev_proxy.write_attribute(attr, value)
             # case 1+fussy: the write to the to the IOR is translated to the
             #              central position of the calibration.
@@ -265,7 +270,7 @@ class TangoAttrIORController(IORegisterController):
                 try:
                     ior_destination = positions.index(value)
                 except Exception:
-                    raise Exception("Invalid position.")
+                    raise ValueError("Invalid position.")
                 self._log.debug("%s ior_destination = %s" % (
                     dev, ior_destination))
                 # central element
@@ -273,9 +278,10 @@ class TangoAttrIORController(IORegisterController):
                 self._log.debug("%s calibrated_position = %s" % (
                     dev, calibrated_position))
                 dev_proxy.write_attribute(attr, calibrated_position)
-        except Exception:
+        except Exception as e:
             self._log.error('Exception writing attribute:%s.%s'
                             % (self.devsExtraAttributes[axis][DEVICE], attr))
+            raise e
 
     # ## #
     # Auxiliar methods for the extra attributes

@@ -222,10 +222,10 @@ class TangoAttrIORController(IORegisterController):
                         return positions[calibration.index(fussyPos)]
                 # if the loop ends, current value is not in the fussy areas.
                 self.devsExtraAttributes[axis][READFAILED] = True
-                msg = 'Position out of calibration bounds. ' \
+                msg = 'Value ({}) out of calibration bounds. ' \
                       'Please review ior calibration or write a valid value ' \
-                      'to the underlying tango attribute: %s.%s' % (
-                          self.devsExtraAttributes[axis][DEVICE], attr)
+                      'to the underlying tango attribute: {}.{}'.format(
+                          value, self.devsExtraAttributes[axis][DEVICE], attr)
                 raise ValueError(msg)
             else:
                 raise Exception(

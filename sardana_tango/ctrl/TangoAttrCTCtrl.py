@@ -141,11 +141,11 @@ class TangoAttrCTController(ReadTangoAttributes, CounterTimerController):
     +) TangoAttribute - Tango attribute to retrieve the value of the counter
     +) Formula - Formula to evaluate using 'VALUE' as the tango attribute value
     As examples you could have:
-    ch1.TangoExtraAttribute = 'my/tango/device/attribute1'
+    ch1.TangoAttribute = 'my/tango/device/attribute1'
     ch1.Formula = '-1 * VALUE'
-    ch2.TangoExtraAttribute = 'my/tango/device/attribute2'
+    ch2.TangoAttribute = 'my/tango/device/attribute2'
     ch2.Formula = 'math.sqrt(VALUE)'
-    ch3.TangoExtraAttribute = 'my_other/tango/device/attribute1'
+    ch3.TangoAttribute = 'my_other/tango/device/attribute1'
     ch3.Formula = 'math.cos(VALUE)'
     """
 

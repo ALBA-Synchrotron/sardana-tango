@@ -1,2 +1,1 @@
-# sardana-tango
-Repository for the Sardana Tango plugins (TangoAttributeCtrls, etc)
+## sardana-tango moved to https://gitlab.com/sardana-org/sardana-tango
